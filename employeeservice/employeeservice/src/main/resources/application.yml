@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: employeeservice
+  config:
+    import: "optional:configserver:http://localhost:7200"
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/employeeDB
+
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
