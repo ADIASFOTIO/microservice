@@ -1,0 +1,11 @@
+server:
+  port: 7202
+
+spring:
+  application:
+    name: employeeservice
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:7201/eureka

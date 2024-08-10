@@ -1,3 +1,6 @@
+server:
+  port: 7200
+
 spring:
   application:
     name: configserver
@@ -5,6 +8,5 @@ spring:
   profiles:
     active: native
 
-server:
-  port: 7200
+
 
