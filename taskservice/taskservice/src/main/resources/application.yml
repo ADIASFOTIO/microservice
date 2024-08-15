@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: taskservice
+  config:
+    import: "optional:configserver:http://localhost:7200"
+
+server:
+  port: 7203
+

@@ -7,7 +7,8 @@ import org.springframework.cloud.config.server.EnableConfigServer;
 @SpringBootApplication
 @EnableConfigServer
 public class ConfigserverApplication {
-
+// docker file cd C:\Users\beuda\Desktop\CORSI\Microservizi_01\microservice\configserver\configserver\Document
+// 	docker-compose -f docker-compose.yml -p microservice up -d
 	public static void main(String[] args) {
 		SpringApplication.run(ConfigserverApplication.class, args);
 	}
