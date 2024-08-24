@@ -20,6 +20,11 @@ public class EmployeeController {
         return new ResponseEntity<EmployeeDTO>(employeeService.save(employeeDTO), HttpStatus.ACCEPTED);
     }
 
+    @PostMapping("/list")
+    public ResponseEntity<List<EmployeeDTO>> addEmployee(@RequestBody List<EmployeeDTO> listEmployeeDTO) {
+        return new ResponseEntity<List<EmployeeDTO>>(employeeService.saveList(listEmployeeDTO), HttpStatus.ACCEPTED);
+    }
+
     @GetMapping
     public ResponseEntity<List<EmployeeDTO>> getAllEmployees() {
         return new ResponseEntity<List<EmployeeDTO>>(employeeService.getAll(), HttpStatus.OK);

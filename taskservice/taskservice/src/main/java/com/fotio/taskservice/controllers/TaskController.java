@@ -10,11 +10,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 
+
 @RestController
 @RequestMapping("/tasks")
 @RequiredArgsConstructor
 public class TaskController {
     private final TaskService taskService;
+
 
     @GetMapping("/{id}")
 
@@ -33,6 +35,11 @@ public class TaskController {
     public ResponseEntity<TaskDTO> createTask(@RequestBody TaskDTO taskDTO) throws JsonProcessingException {
         return new ResponseEntity<TaskDTO>(taskService.saveTask(taskDTO), HttpStatus.CREATED);
         //save to elastic search
+    }
+
+    @PostMapping("/bulk")
+    public ResponseEntity<List<TaskDTO>> createTaskBulk(@RequestBody List<TaskDTO> LisTtaskDTO) throws JsonProcessingException {
+        return new ResponseEntity<List<TaskDTO>>(taskService.saveTaskBulk(LisTtaskDTO), HttpStatus.CREATED);
     }
 
     @GetMapping

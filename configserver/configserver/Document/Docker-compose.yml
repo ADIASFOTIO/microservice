@@ -21,10 +21,13 @@ services:
     container_name: elasticsearch
     restart: always
     expose:
-      - 9200:9200
-      - 9200:9200
+      - 9200
+
     environment:
-      discovery.type: single-node
+      - xpack.security.enabled=false
+      - "discovery.type=single-node"
+    ports:
+      - 9200:9200
 
 
 

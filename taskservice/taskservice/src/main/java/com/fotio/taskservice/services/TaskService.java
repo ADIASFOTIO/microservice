@@ -10,4 +10,5 @@ public interface TaskService {
     public TaskDTO deleteById(String Id);
     public List<TaskDTO> getAllTasks();
     public List<TaskDTO> getTaskPagination(int pagesize,int pageno);
+    List<TaskDTO> saveTaskBulk(List<TaskDTO> lisTtaskDTO);
 }

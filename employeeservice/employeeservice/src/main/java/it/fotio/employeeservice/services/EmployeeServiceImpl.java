@@ -8,6 +8,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -78,5 +79,14 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public Page<EmployeeDTO> findPagination(int pagesize, int pageno, String sortField, String sortDirection) {
         return null;
+    }
+
+    @Override
+    public List<EmployeeDTO> saveList(List<EmployeeDTO> listEmployeeDTO) {
+        List<EmployeeDTO> dto = new ArrayList<>();
+        for (EmployeeDTO elt : listEmployeeDTO) {
+            dto.add(save(elt));
+        }
+        return dto;
     }
 }

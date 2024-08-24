@@ -13,4 +13,6 @@ public interface EmployeeService {
     public EmployeeDTO delete(String Id);
     public EmployeeDTO update(EmployeeDTO employee);
     public Page<EmployeeDTO> findPagination(int pagesize, int pageno, String sortField, String sortDirection);
+
+    List<EmployeeDTO> saveList(List<EmployeeDTO> listEmployeeDTO);
 }
