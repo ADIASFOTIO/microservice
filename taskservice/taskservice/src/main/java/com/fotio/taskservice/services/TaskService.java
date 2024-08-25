@@ -11,4 +11,8 @@ public interface TaskService {
     public List<TaskDTO> getAllTasks();
     public List<TaskDTO> getTaskPagination(int pagesize,int pageno);
     List<TaskDTO> saveTaskBulk(List<TaskDTO> lisTtaskDTO);
+
+    TaskDTO saveTaskWebClient(TaskDTO taskDTO);
+
+    TaskDTO createTaskUseOpenFeign(TaskDTO taskDTO);
 }

@@ -37,6 +37,20 @@ public class TaskController {
         //save to elastic search
     }
 
+    // use web client
+    @PostMapping("/open-feign")
+    public ResponseEntity<TaskDTO> createTaskUseOpenFeign(@RequestBody TaskDTO taskDTO) throws JsonProcessingException {
+        return new ResponseEntity<TaskDTO>(taskService.createTaskUseOpenFeign(taskDTO), HttpStatus.CREATED);
+        //save to elastic search
+    }
+
+    // open feign
+    @PostMapping("/web-client")
+    public ResponseEntity<TaskDTO> createTaskUseWebClient(@RequestBody TaskDTO taskDTO) throws JsonProcessingException {
+        return new ResponseEntity<TaskDTO>(taskService.saveTaskWebClient(taskDTO), HttpStatus.CREATED);
+        //save to elastic search
+    }
+
     @PostMapping("/bulk")
     public ResponseEntity<List<TaskDTO>> createTaskBulk(@RequestBody List<TaskDTO> LisTtaskDTO) throws JsonProcessingException {
         return new ResponseEntity<List<TaskDTO>>(taskService.saveTaskBulk(LisTtaskDTO), HttpStatus.CREATED);

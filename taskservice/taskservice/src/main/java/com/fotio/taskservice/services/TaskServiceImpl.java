@@ -2,6 +2,7 @@ package com.fotio.taskservice.services;
 import com.fotio.taskservice.dto.EmployeeDTO;
 import com.fotio.taskservice.dto.TaskDTO;
 import com.fotio.taskservice.dto.TaskDetailDTO;
+import com.fotio.taskservice.dto.TaskNotificationDTO;
 import com.fotio.taskservice.entities.Task;
 import com.fotio.taskservice.repositories.TaskRepository;
 import org.slf4j.Logger;
@@ -24,6 +25,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +38,8 @@ public class TaskServiceImpl implements TaskService {
     private final Mapper mapper;
     private final Logger logger = LoggerFactory.getLogger(TaskServiceImpl.class);
     private final RestTemplate restTemplate;
+    private final WebClient webClient;
+    private final APIClient apiClient;
     // Rest Template
     @Override
     public TaskDTO saveTask(TaskDTO taskDTO) {
@@ -148,6 +152,49 @@ public class TaskServiceImpl implements TaskService {
         executor.shutdown(); // Fermer le pool de threads
         return result;
     }
+// web client
+    @Override
+    public TaskDTO saveTaskWebClient(TaskDTO taskDTO) {
+        EmployeeDTO employeeDTO = webClient.get()
+                .uri(URL_EMPLOYEES + taskDTO.getAssignee())
+                .retrieve()
+                .bodyToMono(EmployeeDTO.class)
+                .block();
+            taskDTO.setAssignee(employeeDTO.getId());
+            Task task = modelMapper.map(taskDTO, Task.class);
+            taskRepository.save(task);
+            TaskDTO addedtaskDTO = modelMapper.map(task,TaskDTO.class);
+            taskDTO.setId(task.getId());
+            TaskDetailDTO taskDetailDTO = new TaskDetailDTO();
+            taskDetailDTO.setEmployeeId(employeeDTO.getId());
+            taskDetailDTO.setEmployeeName(employeeDTO.getName());
+            taskDetailDTO.setEmployeeSurname(employeeDTO.getSurname());
+            taskDetailDTO.setTaskDescription(taskDTO.getTaskDescription());
+            taskDetailDTO.setPriority(taskDTO.getPriorityType());
+            taskDetailDTO.setStatus(taskDTO.getTaskStatus());
+            taskDetailDTO.setTaskTitle(taskDTO.getTaskTitle());
+            taskDetailDTO = taskDetailService.save(taskDetailDTO);
+            return taskDTO;
+    }
+
+    @Override
+    public TaskDTO createTaskUseOpenFeign(TaskDTO taskDTO) {
+        EmployeeDTO employeeDTO = apiClient.getById(taskDTO.getAssignee());
+        taskDTO.setAssignee(employeeDTO.getId());
+        Task task = modelMapper.map(taskDTO, Task.class);
+        taskRepository.save(task);
+        taskDTO.setId(task.getId());
+        TaskDetailDTO taskDetailDTO = new TaskDetailDTO();
+        taskDetailDTO.setEmployeeId(employeeDTO.getId());
+        taskDetailDTO.setEmployeeName(employeeDTO.getName());
+        taskDetailDTO.setEmployeeSurname(employeeDTO.getSurname());
+        taskDetailDTO.setTaskDescription(taskDTO.getTaskDescription());
+        taskDetailDTO.setPriority(taskDTO.getPriorityType());
+        taskDetailDTO.setStatus(taskDTO.getTaskStatus());
+        taskDetailDTO.setTaskTitle(taskDTO.getTaskTitle());
+        taskDetailDTO = taskDetailService.save(taskDetailDTO);
+        return taskDTO;
+    }
 
     // Méthode pour diviser une liste en sous-listes
     private <T> List<List<T>> partitionList(List<T> list, int partitions) {
@@ -159,4 +206,3 @@ public class TaskServiceImpl implements TaskService {
         return partitioned;
     }
 }
-
