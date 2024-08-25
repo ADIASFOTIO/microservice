@@ -1,10 +1,12 @@
 package com.fotio.taskservice.services;
+import com.fotio.taskservice.dto.EmployeeDTO;
 import com.fotio.taskservice.dto.TaskDTO;
+import com.fotio.taskservice.dto.TaskDetailDTO;
 import com.fotio.taskservice.entities.Task;
-import com.fotio.taskservice.mapper.Mapper;
 import com.fotio.taskservice.repositories.TaskRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +15,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import com.fotio.taskservice.mapper.Mapper;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
@@ -20,27 +23,41 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Service;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+import org.springframework.web.client.RestTemplate;
 
 @Service
 @RequiredArgsConstructor
 public class TaskServiceImpl implements TaskService {
 
+    public static final String URL_EMPLOYEES = "http://localhost:7202/api/employees/";
     private final TaskRepository taskRepository;
+    private final TaskDetailService taskDetailService;
     private final ModelMapper modelMapper;
     private final Mapper mapper;
     private final Logger logger = LoggerFactory.getLogger(TaskServiceImpl.class);
-
+    private final RestTemplate restTemplate;
+    // Rest Template
     @Override
     public TaskDTO saveTask(TaskDTO taskDTO) {
-        Task task = taskRepository.save(modelMapper.map(taskDTO,Task.class));
-        return modelMapper.map(task,TaskDTO.class);
+        ResponseEntity<EmployeeDTO> employeeDTOResponseEntity = restTemplate.getForEntity(URL_EMPLOYEES + taskDTO.getAssignee(), EmployeeDTO.class);
+        EmployeeDTO employeeDTO = employeeDTOResponseEntity.getBody();
+        if (employeeDTOResponseEntity.getStatusCode().is2xxSuccessful()) {
+            taskDTO.setAssignee(employeeDTO.getId());
+            Task task = modelMapper.map(taskDTO, Task.class);
+            taskRepository.save(task);
+            TaskDTO addedtaskDTO = modelMapper.map(task,TaskDTO.class);
+            taskDTO.setId(task.getId());
+            TaskDetailDTO taskDetailDTO = new TaskDetailDTO();
+            taskDetailDTO.setEmployeeId(employeeDTO.getId());
+            taskDetailDTO.setEmployeeName(employeeDTO.getName());
+            taskDetailDTO.setEmployeeSurname(employeeDTO.getSurname());
+            taskDetailDTO.setTaskDescription(taskDTO.getTaskDescription());
+            taskDetailDTO.setPriority(taskDTO.getPriorityType());
+            taskDetailDTO.setStatus(taskDTO.getTaskStatus());
+            taskDetailDTO.setTaskTitle(taskDTO.getTaskTitle());
+            taskDetailDTO = taskDetailService.save(taskDetailDTO);
+            return taskDTO;
+        } else return new TaskDTO();
     }
 
     @Override
@@ -86,7 +103,6 @@ public class TaskServiceImpl implements TaskService {
         return dtolist;
     }
 
-    @Override
     public List<TaskDTO> saveTaskBulk(List<TaskDTO> lisTtaskDTO) {
         logger.info("[{}] saveTaskBulk - dto= {}", lisTtaskDTO);
 
@@ -105,7 +121,12 @@ public class TaskServiceImpl implements TaskService {
                 List<Task> LisTtask = partition.stream()
                         .map(e -> modelMapper.map(e, Task.class))
                         .collect(Collectors.toList());
-                List<Task> LisTtaskSave = taskRepository.saveAll(LisTtask);
+//                List<Task> LisTtaskSave = taskRepository.saveAll(LisTtask);
+                List<TaskDTO> lisTtaskDTOtoSave = mapper.mapList(LisTtask,TaskDTO.class);
+                List<TaskDTO> LisTtaskSave = new ArrayList<>();
+                for (TaskDTO taskDTO : lisTtaskDTOtoSave) {
+                    LisTtaskSave.add(saveTask(taskDTO));
+                }
                 return LisTtaskSave.stream()
                         .map(e -> modelMapper.map(e, TaskDTO.class))
                         .collect(Collectors.toList());
