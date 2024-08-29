@@ -1,0 +1,29 @@
+server:
+  port: 7204
+
+spring:
+  application:
+    name: notificationservice
+
+  rabbitmq:
+    username: fotiomicroservice
+    password: fotiomicroservice
+    port: '5672'
+    host: localhost
+
+  datasource:
+    username: postgres
+    password: '12345'
+    url: jdbc:postgresql://localhost:5433/TaskDB
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: 'true'
+    hibernate:
+      ddl-auto: update
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:7201/eureka

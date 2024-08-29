@@ -29,6 +29,27 @@ services:
     ports:
       - 9200:9200
 
+  postgres:
+    image: postgres
+    container_name: postgress
+    restart: always
+    ports:
+      - 5433:5433
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=12345
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    restart: always
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    environment:
+      - RABBITMQ_DEFAULT_USER=fotiomicroservice
+      - RABBITMQ_DEFAULT_PASS=fotiomicroservice
+
 
 
 
