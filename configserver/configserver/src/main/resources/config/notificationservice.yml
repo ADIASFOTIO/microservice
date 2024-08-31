@@ -14,7 +14,7 @@ spring:
   datasource:
     username: postgres
     password: '12345'
-    url: jdbc:postgresql://localhost:5433/TaskDB
+    url: jdbc:postgresql://localhost:5432/TaskDB
   jpa:
     properties:
       hibernate:

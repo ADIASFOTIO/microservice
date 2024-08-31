@@ -1,7 +1,7 @@
 version: '3.1'
 services:
   mongo:
-    image: mongo
+    image: mongo:4.4
     container_name: mongo
     restart: always
     ports:
@@ -31,10 +31,10 @@ services:
 
   postgres:
     image: postgres
-    container_name: postgress
+    container_name: postgres
     restart: always
     ports:
-      - 5433:5433
+      - 5432:5432
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=12345
