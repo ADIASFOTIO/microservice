@@ -34,3 +34,14 @@ eureka:
   data:
     elasticsearch:
       cluster-node: localhost:9200
+
+
+
+ms:
+  rabbit:
+    exchange:
+      name: fotioexchange
+    queue:
+      name: fotioqueue
+    routing:
+      name: fotiorouting
