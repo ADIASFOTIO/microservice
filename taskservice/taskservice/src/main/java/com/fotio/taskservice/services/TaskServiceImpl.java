@@ -1,9 +1,11 @@
 package com.fotio.taskservice.services;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fotio.taskservice.dto.EmployeeDTO;
 import com.fotio.taskservice.dto.TaskDTO;
 import com.fotio.taskservice.dto.TaskDetailDTO;
 import com.fotio.taskservice.dto.TaskNotificationDTO;
 import com.fotio.taskservice.entities.Task;
+import com.fotio.taskservice.producer.TaskNotificationProducer;
 import com.fotio.taskservice.repositories.TaskRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,9 +42,10 @@ public class TaskServiceImpl implements TaskService {
     private final RestTemplate restTemplate;
     private final WebClient webClient;
     private final APIClient apiClient;
+    private final TaskNotificationProducer taskNotificationProducer;
     // Rest Template
     @Override
-    public TaskDTO saveTask(TaskDTO taskDTO) {
+    public TaskDTO saveTask(TaskDTO taskDTO) throws JsonProcessingException {
         ResponseEntity<EmployeeDTO> employeeDTOResponseEntity = restTemplate.getForEntity(URL_EMPLOYEES + taskDTO.getAssignee(), EmployeeDTO.class);
         EmployeeDTO employeeDTO = employeeDTOResponseEntity.getBody();
         if (employeeDTOResponseEntity.getStatusCode().is2xxSuccessful()) {
@@ -60,6 +63,13 @@ public class TaskServiceImpl implements TaskService {
             taskDetailDTO.setStatus(taskDTO.getTaskStatus());
             taskDetailDTO.setTaskTitle(taskDTO.getTaskTitle());
             taskDetailDTO = taskDetailService.save(taskDetailDTO);
+
+            TaskNotificationDTO taskNotificationDTO = new TaskNotificationDTO();
+            taskNotificationDTO.setTaskId(task.getId());
+            taskNotificationDTO.setTaskTitle(task.getTaskTitle());
+            taskNotificationDTO.setEmployeeId(employeeDTO.getId());
+            taskNotificationDTO.setTaskDescription(task.getTaskDescription());
+            taskNotificationProducer.sendToQueue(taskNotificationDTO);
             return taskDTO;
         } else return new TaskDTO();
     }
@@ -76,6 +86,7 @@ public class TaskServiceImpl implements TaskService {
         task.setNotes(taskDTO.getNotes());
         task.setAssignee(taskDTO.getAssignee());
         taskRepository.save(task);
+
         return taskDTO;
     }
 
@@ -107,7 +118,7 @@ public class TaskServiceImpl implements TaskService {
         return dtolist;
     }
 
-    public List<TaskDTO> saveTaskBulk(List<TaskDTO> lisTtaskDTO) {
+    public List<TaskDTO> saveTaskBulk(List<TaskDTO> lisTtaskDTO) throws JsonProcessingException{
         logger.info("[{}] saveTaskBulk - dto= {}", lisTtaskDTO);
 
         // Nombre de threads souhaité (peut être ajusté selon les besoins)
@@ -153,32 +164,39 @@ public class TaskServiceImpl implements TaskService {
         return result;
     }
 // web client
-    @Override
-    public TaskDTO saveTaskWebClient(TaskDTO taskDTO) {
-        EmployeeDTO employeeDTO = webClient.get()
-                .uri(URL_EMPLOYEES + taskDTO.getAssignee())
-                .retrieve()
-                .bodyToMono(EmployeeDTO.class)
-                .block();
-            taskDTO.setAssignee(employeeDTO.getId());
-            Task task = modelMapper.map(taskDTO, Task.class);
-            taskRepository.save(task);
-            TaskDTO addedtaskDTO = modelMapper.map(task,TaskDTO.class);
-            taskDTO.setId(task.getId());
-            TaskDetailDTO taskDetailDTO = new TaskDetailDTO();
-            taskDetailDTO.setEmployeeId(employeeDTO.getId());
-            taskDetailDTO.setEmployeeName(employeeDTO.getName());
-            taskDetailDTO.setEmployeeSurname(employeeDTO.getSurname());
-            taskDetailDTO.setTaskDescription(taskDTO.getTaskDescription());
-            taskDetailDTO.setPriority(taskDTO.getPriorityType());
-            taskDetailDTO.setStatus(taskDTO.getTaskStatus());
-            taskDetailDTO.setTaskTitle(taskDTO.getTaskTitle());
-            taskDetailDTO = taskDetailService.save(taskDetailDTO);
-            return taskDTO;
-    }
+@Override
+public TaskDTO saveTaskWebClient(TaskDTO taskDTO) throws JsonProcessingException {
+    EmployeeDTO employeeDTO = webClient.get()
+            .uri(URL_EMPLOYEES + taskDTO.getAssignee())
+            .retrieve()
+            .bodyToMono(EmployeeDTO.class)
+            .block();
+    taskDTO.setAssignee(employeeDTO.getId());
+    Task task = modelMapper.map(taskDTO, Task.class);
+    taskRepository.save(task);
+    TaskDTO addedtaskDTO = modelMapper.map(task, TaskDTO.class);
+    taskDTO.setId(task.getId());
+    TaskDetailDTO taskDetailDTO = new TaskDetailDTO();
+    taskDetailDTO.setEmployeeId(employeeDTO.getId());
+    taskDetailDTO.setEmployeeName(employeeDTO.getName());
+    taskDetailDTO.setEmployeeSurname(employeeDTO.getSurname());
+    taskDetailDTO.setTaskDescription(taskDTO.getTaskDescription());
+    taskDetailDTO.setPriority(taskDTO.getPriorityType());
+    taskDetailDTO.setStatus(taskDTO.getTaskStatus());
+    taskDetailDTO.setTaskTitle(taskDTO.getTaskTitle());
+    taskDetailDTO = taskDetailService.save(taskDetailDTO);
+
+    TaskNotificationDTO taskNotificationDTO = new TaskNotificationDTO();
+    taskNotificationDTO.setTaskId(task.getId());
+    taskNotificationDTO.setTaskTitle(task.getTaskTitle());
+    taskNotificationDTO.setEmployeeId(employeeDTO.getId());
+    taskNotificationDTO.setTaskDescription(task.getTaskDescription());
+    taskNotificationProducer.sendToQueue(taskNotificationDTO);
+    return taskDTO;
+}
 
     @Override
-    public TaskDTO createTaskUseOpenFeign(TaskDTO taskDTO) {
+    public TaskDTO createTaskUseOpenFeign(TaskDTO taskDTO) throws JsonProcessingException {
         EmployeeDTO employeeDTO = apiClient.getById(taskDTO.getAssignee());
         taskDTO.setAssignee(employeeDTO.getId());
         Task task = modelMapper.map(taskDTO, Task.class);
@@ -193,6 +211,13 @@ public class TaskServiceImpl implements TaskService {
         taskDetailDTO.setStatus(taskDTO.getTaskStatus());
         taskDetailDTO.setTaskTitle(taskDTO.getTaskTitle());
         taskDetailDTO = taskDetailService.save(taskDetailDTO);
+
+        TaskNotificationDTO taskNotificationDTO = new TaskNotificationDTO();
+        taskNotificationDTO.setTaskId(task.getId());
+        taskNotificationDTO.setTaskTitle(task.getTaskTitle());
+        taskNotificationDTO.setEmployeeId(employeeDTO.getId());
+        taskNotificationDTO.setTaskDescription(task.getTaskDescription());
+        taskNotificationProducer.sendToQueue(taskNotificationDTO);
         return taskDTO;
     }
 

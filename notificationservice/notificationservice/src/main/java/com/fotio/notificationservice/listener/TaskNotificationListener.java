@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fotio.notificationservice.dto.TaskNotificationDTO;
 import com.fotio.notificationservice.entities.Notification;
+import com.fotio.notificationservice.repositories.NotificationRepository;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
