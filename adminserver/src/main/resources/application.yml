@@ -1,0 +1,18 @@
+eureka:
+  instance:
+    lease-renewal-interval-in-seconds: 10
+    health-check-url-path: /actuator/health
+    metadata-map:
+      startup: ${random.int}
+  client:
+    registry-fetch-interval-seconds: 5
+    service-url:
+      defaultZone: http://localhost:7201/eureka
+  endpoint.health.show-details: always
+server:
+  port: 7207
+spring:
+  application:
+    name: adminserver
+  config:
+    import: "optional:configserver:http://localhost:7200"

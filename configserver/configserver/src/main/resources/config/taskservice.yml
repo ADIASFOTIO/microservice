@@ -4,6 +4,10 @@ server:
 spring:
   application:
     name: taskservice
+  boot:
+    admin:
+      client:
+        url: http://localhost:7207
 
   rabbitmq:
     username: fotiomicroservice
@@ -46,7 +50,9 @@ ms:
     routing:
       name: fotiorouting
 
-  management:
-    tracing:
-      sampling:
-        probability: 1.0
+management:
+  endpoints.web.exposure.include:
+    - '*'
+  tracing:
+    sampling:
+      probability: 1.0

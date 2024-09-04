@@ -6,6 +6,7 @@ import com.fotio.taskservice.services.TaskService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -15,6 +16,7 @@ import java.util.List;
 @RequestMapping("/tasks")
 @RequiredArgsConstructor
 public class TaskController {
+
     private final TaskService taskService;
 
 
@@ -32,6 +34,7 @@ public class TaskController {
     }
 
     @PostMapping
+    @CircuitBreaker(name = "TASK_SERVICE",fallbackMethod = "TaskServicefallbackMethodForDTO")
     public ResponseEntity<TaskDTO> createTask(@RequestBody TaskDTO taskDTO) throws JsonProcessingException {
         return new ResponseEntity<TaskDTO>(taskService.saveTask(taskDTO), HttpStatus.CREATED);
         //save to elastic search

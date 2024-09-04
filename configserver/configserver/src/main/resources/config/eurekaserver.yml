@@ -4,13 +4,19 @@ server:
 spring:
   application:
     name: eurekaserver
+  boot:
+    admin:
+      client:
+        url: http://localhost:7207
 
 eureka:
   client:
     serviceUrl:
       defaultZone: http://localhost:7201/eureka
 
-  management:
-    tracing:
-      sampling:
-        probability: 1.0
+management:
+  endpoints.web.exposure.include:
+    - '*'
+  tracing:
+    sampling:
+      probability: 1.0
