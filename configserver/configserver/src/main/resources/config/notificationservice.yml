@@ -36,3 +36,9 @@ ms:
       name: fotioqueue
     routing:
       name: fotiorouting
+
+
+  management:
+    tracing:
+      sampling:
+        probability: 1.0

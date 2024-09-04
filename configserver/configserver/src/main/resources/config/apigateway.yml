@@ -1,0 +1,33 @@
+spring:
+  cloud:
+    gateway:
+      mvc:
+        routes:
+          - id: employeeservice
+            uri: lb://employeeservice
+            predicates:
+              - Path=/api/employees/**
+          - id: taskservice
+            uri: lb://taskservice
+            predicates:
+              - Path=/api/tasks/**
+          - id: taskdetailservice
+            uri: lb://taskdetail
+            predicates:
+              - Path=/api/taskdetail/**
+          - id: notificationservice
+            uri: lb://notificationservice
+            predicates:
+              - Path=/api/notification/**
+  application:
+    name: apigateway
+server:
+  port: 7206
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:7201/eureka
+management:
+  tracing:
+    sampling:
+      probability: 1.0

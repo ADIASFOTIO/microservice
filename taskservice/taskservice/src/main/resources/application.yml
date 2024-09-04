@@ -7,3 +7,23 @@ spring:
 server:
   port: 7203
 
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  endpoints.web.exposure.include:
+    - '*'
+  endpoint.health.show-details: always
+  health.circuitbreakers.enabled: true
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      TASK_SERVICE:
+        minimum-number-of-calls: '5'
+        permitted-number-of-calls-in-half-open-state: '3'
+        register-health-indicator: 'true'
+        automatic-transition-from-open-to-half-open-enabled: 'true'
+        wait-duration-in-open-state: 5s
+        sliding-window-size: '10'
+        failure-rate-threshold: '50'

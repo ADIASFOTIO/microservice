@@ -50,7 +50,12 @@ services:
       - RABBITMQ_DEFAULT_USER=fotiomicroservice
       - RABBITMQ_DEFAULT_PASS=fotiomicroservice
 
-
+  zipkin:
+    image: openzipkin/zipkin
+    container_name: zipkin
+    restart: always
+    ports:
+      - 9411:9411
 
 
 
